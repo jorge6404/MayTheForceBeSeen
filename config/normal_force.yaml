@@ -1,0 +1,11 @@
+/**:
+  ros__parameters:
+    # Imagen de entrada (sensor_msgs/CompressedImage)
+    input_topic: /cirtesub/stereo_left_camera/camera/image_raw/compressed
+    # Fuerza normal estimada en N (std_msgs/Float64). + empuja la red, − tira de ella
+    output_topic: /visual_normal_force/force
+    # Motor de inferencia: auto | tensorrt | cuda | cpu
+    # auto = TensorRT si está disponible (Jetson), si no CUDA (PC con NVIDIA), si no CPU
+    engine: auto
+    # Frecuencia de inferencia (Hz)
+    rate_hz: 5.0

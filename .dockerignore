@@ -1,0 +1,7 @@
+.git
+**/__pycache__
+build
+install
+log
+# el modelo lo descarga CMake de Hugging Face
+models/*.onnx

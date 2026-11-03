@@ -1,0 +1,6 @@
+# El modelo se descarga de Hugging Face al compilar (CMakeLists.txt)
+models/*.onnx
+build/
+install/
+log/
+__pycache__/

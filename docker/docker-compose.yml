@@ -1,0 +1,37 @@
+# Desde esta carpeta:  docker compose up --build cpu     |     docker compose up --build gpu
+# Para cambiar topics/Hz/motor: edita ../config/normal_force.yaml y reinicia (se monta en /config, sin reconstruir).
+# Mismo ROS_DOMAIN_ID/DDS que el resto: red host.
+x-comun: &comun
+  network_mode: host
+  ipc: host
+  environment:
+    - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-4}
+    - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    # Solo UDP: con memoria compartida hay discovery pero no llegan datos del host (root vs. usuario en /dev/shm)
+    - FASTRTPS_DEFAULT_PROFILES_FILE=/fastdds_udp.xml
+  volumes:
+    - ./fastdds_udp.xml:/fastdds_udp.xml:ro
+    - ../config:/config:ro
+    - vnf_cache:/root/.cache/visual_normal_force   # engines de TensorRT
+    - vnf_nv:/root/.nv                             # caché JIT de CUDA (Blackwell: ~2 min solo la 1.ª vez)
+
+services:
+  cpu:
+    <<: *comun
+    build: {context: .., dockerfile: docker/Dockerfile}
+    image: visual_normal_force:cpu
+  gpu:
+    <<: *comun
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args: {BASE: "nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04", ORT_FLAVOR: "-gpu"}
+    image: visual_normal_force:gpu
+    deploy:
+      resources:
+        reservations:
+          devices: [{driver: nvidia, count: all, capabilities: [gpu]}]
+
+volumes:
+  vnf_cache:
+  vnf_nv:
